@@ -129,6 +129,12 @@ public class ModelsTest {
   }
 
   @Test
+  public void canDetectLHSinRHS() {
+    Assertions.assertTrue(new Rule("A : A B").isRuleDirectlyContainLHSWordInRHS());
+    Assertions.assertFalse(new Rule("A : L C").isRuleDirectlyContainLHSWordInRHS());
+  }
+
+  @Test
   public void rulesFromSameStringAreEqual() {
     Assertions.assertEquals(new Rule("A : mamad B"), new Rule("A  :  mamad B"));
   }

@@ -31,6 +31,10 @@ public class Rule {
     return rightHandSide;
   }
 
+  public boolean isRuleDirectlyContainLHSWordInRHS() {
+    return getRHS().getWords().stream().anyMatch(getLHS()::equals);
+  }
+
   @Override
   public boolean equals(Object o) {
     if (this == o) return true;
