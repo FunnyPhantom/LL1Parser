@@ -99,44 +99,44 @@ public class ModelsTest {
   // Rule
   @Test
   public void canCreateRule() {
-    new Rule("S : A B");
-    new Rule("S : #");
+    Rule.of("S : A B");
+    Rule.of("S : #");
   }
 
   @Test
   public void ruleLHSGetsParsedCorrectly() {
-    Assertions.assertEquals(new Rule("S : A B").getLHS(), Word.of("S"));
-    Assertions.assertEquals(new Rule("A : A B").getLHS(), Word.of("A"));
-    Assertions.assertEquals(new Rule("              B          : A B").getLHS(), Word.of("B"));
+    Assertions.assertEquals(Rule.of("S : A B").getLHS(), Word.of("S"));
+    Assertions.assertEquals(Rule.of("A : A B").getLHS(), Word.of("A"));
+    Assertions.assertEquals(Rule.of("              B          : A B").getLHS(), Word.of("B"));
   }
 
   @Test
   public void ruleLHSMustBeNotTerminalOrEmpty() {
-    Assertions.assertThrows(RuntimeException.class, () -> new Rule("a : A B"));
-    Assertions.assertThrows(RuntimeException.class, () -> new Rule("a : A #"));
-    Assertions.assertThrows(RuntimeException.class, () -> new Rule(" : A #"));
-    Assertions.assertThrows(RuntimeException.class, () -> new Rule(" "));
+    Assertions.assertThrows(RuntimeException.class, () -> Rule.of("a : A B"));
+    Assertions.assertThrows(RuntimeException.class, () -> Rule.of("a : A #"));
+    Assertions.assertThrows(RuntimeException.class, () -> Rule.of(" : A #"));
+    Assertions.assertThrows(RuntimeException.class, () -> Rule.of(" "));
   }
 
   @Test
   public void ruleRHSGetsParsedCorrectly() {
-    var rule = new Rule("A : b c");
+    var rule = Rule.of("A : b c");
     Assertions.assertEquals(rule.getRHS(), Sentence.getSentenceFromString("b c"));
-    rule = new Rule("A : #");
+    rule = Rule.of("A : #");
     Assertions.assertEquals(rule.getRHS(), Sentence.getSentenceFromString("#"));
-    rule = new Rule("ST: ++ A");
+    rule = Rule.of("ST: ++ A");
     Assertions.assertEquals(rule.getRHS(), Sentence.getSentenceFromString("++ A"));
   }
 
   @Test
   public void canDetectLHSinRHS() {
-    Assertions.assertTrue(new Rule("A : A B").isRuleDirectlyContainLHSWordInRHS());
-    Assertions.assertFalse(new Rule("A : L C").isRuleDirectlyContainLHSWordInRHS());
+    Assertions.assertTrue(Rule.of("A : A B").isRuleDirectlyContainLHSWordInRHS());
+    Assertions.assertFalse(Rule.of("A : L C").isRuleDirectlyContainLHSWordInRHS());
   }
 
   @Test
   public void rulesFromSameStringAreEqual() {
-    Assertions.assertEquals(new Rule("A : mamad B"), new Rule("A  :  mamad B"));
+    Assertions.assertEquals(Rule.of("A : mamad B"), Rule.of("A  :  mamad B"));
   }
 
   // RuleTable
@@ -152,7 +152,7 @@ public class ModelsTest {
   @Test
   public void rulesGetAddedCorrectly() {
     Assertions.assertEquals(
-        table.getRules(), ruleStringsSample.stream().map(Rule::new).collect(Collectors.toSet()));
+        table.getRules(), ruleStringsSample.stream().map(Rule::of).collect(Collectors.toSet()));
   }
 
   @Test
@@ -160,19 +160,19 @@ public class ModelsTest {
     Assertions.assertEquals(
         table.getWordRules("S"),
         ruleStringsSample.stream()
-            .map(Rule::new)
+            .map(Rule::of)
             .filter(r -> r.getLHS().equals(Word.of("S")))
             .collect(Collectors.toSet()));
     Assertions.assertEquals(
         table.getWordRules("ST"),
         ruleStringsSample.stream()
-            .map(Rule::new)
+            .map(Rule::of)
             .filter(r -> r.getLHS().equals(Word.of("ST")))
             .collect(Collectors.toSet()));
     Assertions.assertEquals(
         table.getWordRules("STP"),
         ruleStringsSample.stream()
-            .map(Rule::new)
+            .map(Rule::of)
             .filter(r -> r.getLHS().equals(Word.of("STP")))
             .collect(Collectors.toSet()));
   }
@@ -181,7 +181,7 @@ public class ModelsTest {
   public void canCorrectlyAggregateLHS() {
     Assertions.assertEquals(
         table.getLHSWords(),
-        ruleStringsSample.stream().map(Rule::new).map(Rule::getLHS).collect(Collectors.toSet()));
+        ruleStringsSample.stream().map(Rule::of).map(Rule::getLHS).collect(Collectors.toSet()));
   }
 
   @Test

@@ -8,7 +8,7 @@ public class Rule {
   private Word leftHandSide;
   private Sentence rightHandSide;
 
-  public Rule(String ruleString) {
+  private Rule(String ruleString) {
     var sideStrings =
         Arrays.stream(ruleString.strip().split(":"))
             .map(String::strip)
@@ -21,6 +21,10 @@ public class Rule {
     if (leftHandSide.getType() == WordType.TERMINAL)
       throw new RuntimeException("LHS cannot be Terminal Word");
     rightHandSide = Sentence.getSentenceFromString(sideStrings.get(1));
+  }
+
+  public static Rule of(String ruleString) {
+    return new Rule(ruleString);
   }
 
   public Word getLHS() {

@@ -8,7 +8,7 @@ public class RuleTable {
   private Set<Rule> rules;
 
   public RuleTable(List<String> parsedRuleStrings) {
-    rules = parsedRuleStrings.stream().map(Rule::new).collect(Collectors.toUnmodifiableSet());
+    rules = parsedRuleStrings.stream().map(Rule::of).collect(Collectors.toUnmodifiableSet());
   }
 
   public Set<Word> getLHSWords() {

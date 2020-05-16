@@ -44,9 +44,9 @@ public class InputParserTest {
         Set.of("S", "A", "B").stream().map(Word::of).collect(Collectors.toSet()));
     Assertions.assertEquals(
         ruleTable.getStartingRules(),
-        Set.of("S: A B").stream().map(Rule::new).collect(Collectors.toSet()));
+        Set.of("S: A B").stream().map(Rule::of).collect(Collectors.toSet()));
     Assertions.assertEquals(
         ruleTable.getWordRules("A"),
-        Set.of("A  :  mamad").stream().map(Rule::new).collect(Collectors.toSet()));
+        Set.of("A  :  mamad").stream().map(Rule::of).collect(Collectors.toSet()));
   }
 }
