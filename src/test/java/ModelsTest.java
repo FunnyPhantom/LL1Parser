@@ -9,39 +9,39 @@ public class ModelsTest {
   // Word
   @Test
   public void canCreateWord() {
-    new Word("mamad");
+    Word.of("mamad");
   }
 
   @Test
   public void wordsTypeGetsAssignedSuccessfully() {
-    Assertions.assertEquals(new Word("A").getType(), WordType.NON_TERMINAL);
-    Assertions.assertEquals(new Word("a").getType(), WordType.TERMINAL);
-    Assertions.assertEquals(new Word(";").getType(), WordType.TERMINAL);
-    Assertions.assertEquals(new Word("$").getType(), WordType.TERMINAL);
-    Assertions.assertEquals(new Word("EXP").getType(), WordType.NON_TERMINAL);
-    Assertions.assertEquals(new Word("EXP2").getType(), WordType.NON_TERMINAL);
+    Assertions.assertEquals(Word.of("A").getType(), WordType.NON_TERMINAL);
+    Assertions.assertEquals(Word.of("a").getType(), WordType.TERMINAL);
+    Assertions.assertEquals(Word.of(";").getType(), WordType.TERMINAL);
+    Assertions.assertEquals(Word.of("$").getType(), WordType.TERMINAL);
+    Assertions.assertEquals(Word.of("EXP").getType(), WordType.NON_TERMINAL);
+    Assertions.assertEquals(Word.of("EXP2").getType(), WordType.NON_TERMINAL);
   }
 
   @Test
   public void wordsWithSameNameAreEqual() {
-    Assertions.assertEquals(new Word("A"), new Word("A"));
-    Assertions.assertEquals(new Word("b"), new Word("b"));
-    Assertions.assertNotEquals(new Word("A"), new Word("a"));
-    Assertions.assertNotEquals(new Word("B"), new Word("b"));
+    Assertions.assertEquals(Word.of("A"), Word.of("A"));
+    Assertions.assertEquals(Word.of("b"), Word.of("b"));
+    Assertions.assertNotEquals(Word.of("A"), Word.of("a"));
+    Assertions.assertNotEquals(Word.of("B"), Word.of("b"));
   }
 
   @Test
   public void toStringWorksIsAsIntended() {
-    Assertions.assertEquals(new Word("A").toString(), "A");
-    System.out.println(new Word("A"));
-    Assertions.assertEquals(new Word("EXP0").toString(), "EXP0");
-    System.out.println(new Word("EXP0"));
+    Assertions.assertEquals(Word.of("A").toString(), "A");
+    System.out.println(Word.of("A"));
+    Assertions.assertEquals(Word.of("EXP0").toString(), "EXP0");
+    System.out.println(Word.of("EXP0"));
   }
 
   @Test
   public void shouldThrowExceptionIfNameIsIllegal() {
-    Assertions.assertThrows(RuntimeException.class, () -> new Word("#"));
-    Assertions.assertThrows(RuntimeException.class, () -> new Word(":"));
+    Assertions.assertThrows(RuntimeException.class, () -> Word.of("#"));
+    Assertions.assertThrows(RuntimeException.class, () -> Word.of(":"));
   }
 
   // Sentence
@@ -53,21 +53,21 @@ public class ModelsTest {
   @Test
   public void correctSequenceOfWordsWillBeCreated() {
     var sentence = Sentence.getSentenceFromString("A B C");
-    Assertions.assertEquals(sentence.getWordAt(0), new Word("A"));
-    Assertions.assertEquals(sentence.getWordAt(1), new Word("B"));
-    Assertions.assertEquals(sentence.getWordAt(2), new Word("C"));
+    Assertions.assertEquals(sentence.getWordAt(0), Word.of("A"));
+    Assertions.assertEquals(sentence.getWordAt(1), Word.of("B"));
+    Assertions.assertEquals(sentence.getWordAt(2), Word.of("C"));
 
     sentence = Sentence.getSentenceFromString("A if B else ST");
-    Assertions.assertEquals(sentence.getWordAt(0), new Word("A"));
-    Assertions.assertEquals(sentence.getWordAt(1), new Word("if"));
-    Assertions.assertEquals(sentence.getWordAt(2), new Word("B"));
-    Assertions.assertEquals(sentence.getWordAt(3), new Word("else"));
-    Assertions.assertEquals(sentence.getWordAt(4), new Word("ST"));
+    Assertions.assertEquals(sentence.getWordAt(0), Word.of("A"));
+    Assertions.assertEquals(sentence.getWordAt(1), Word.of("if"));
+    Assertions.assertEquals(sentence.getWordAt(2), Word.of("B"));
+    Assertions.assertEquals(sentence.getWordAt(3), Word.of("else"));
+    Assertions.assertEquals(sentence.getWordAt(4), Word.of("ST"));
 
     sentence = Sentence.getSentenceFromString("    A     B     C    ");
-    Assertions.assertEquals(sentence.getWordAt(0), new Word("A"));
-    Assertions.assertEquals(sentence.getWordAt(1), new Word("B"));
-    Assertions.assertEquals(sentence.getWordAt(2), new Word("C"));
+    Assertions.assertEquals(sentence.getWordAt(0), Word.of("A"));
+    Assertions.assertEquals(sentence.getWordAt(1), Word.of("B"));
+    Assertions.assertEquals(sentence.getWordAt(2), Word.of("C"));
 
     sentence = Sentence.getSentenceFromString("#");
     Assertions.assertTrue(sentence.isNullSentence());
@@ -105,9 +105,9 @@ public class ModelsTest {
 
   @Test
   public void ruleLHSGetsParsedCorrectly() {
-    Assertions.assertEquals(new Rule("S : A B").getLHS(), new Word("S"));
-    Assertions.assertEquals(new Rule("A : A B").getLHS(), new Word("A"));
-    Assertions.assertEquals(new Rule("              B          : A B").getLHS(), new Word("B"));
+    Assertions.assertEquals(new Rule("S : A B").getLHS(), Word.of("S"));
+    Assertions.assertEquals(new Rule("A : A B").getLHS(), Word.of("A"));
+    Assertions.assertEquals(new Rule("              B          : A B").getLHS(), Word.of("B"));
   }
 
   @Test
@@ -161,19 +161,19 @@ public class ModelsTest {
         table.getWordRules("S"),
         ruleStringsSample.stream()
             .map(Rule::new)
-            .filter(r -> r.getLHS().equals(new Word("S")))
+            .filter(r -> r.getLHS().equals(Word.of("S")))
             .collect(Collectors.toSet()));
     Assertions.assertEquals(
         table.getWordRules("ST"),
         ruleStringsSample.stream()
             .map(Rule::new)
-            .filter(r -> r.getLHS().equals(new Word("ST")))
+            .filter(r -> r.getLHS().equals(Word.of("ST")))
             .collect(Collectors.toSet()));
     Assertions.assertEquals(
         table.getWordRules("STP"),
         ruleStringsSample.stream()
             .map(Rule::new)
-            .filter(r -> r.getLHS().equals(new Word("STP")))
+            .filter(r -> r.getLHS().equals(Word.of("STP")))
             .collect(Collectors.toSet()));
   }
 

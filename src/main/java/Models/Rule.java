@@ -17,7 +17,7 @@ public class Rule {
       throw new RuntimeException(
           String.format("rule string \"%s\" is not a valid ruleString", ruleString));
 
-    leftHandSide = new Word(sideStrings.get(0));
+    leftHandSide = Word.of(sideStrings.get(0));
     if (leftHandSide.getType() == WordType.TERMINAL)
       throw new RuntimeException("LHS cannot be Terminal Word");
     rightHandSide = Sentence.getSentenceFromString(sideStrings.get(1));

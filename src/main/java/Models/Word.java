@@ -9,10 +9,14 @@ public class Word {
   @Getter private String name;
   @Getter private WordType type;
 
-  public Word(String name) {
+  private Word(String name) {
     if (isNameIllegal(name)) throw new RuntimeException(String.format("Name cant be \"%s\"", name));
     this.name = name;
     this.type = isAllCapitalLetter(name) ? WordType.NON_TERMINAL : WordType.TERMINAL;
+  }
+
+  public static Word of(String name) {
+    return new Word(name);
   }
 
   private static boolean isNameIllegal(String s) {

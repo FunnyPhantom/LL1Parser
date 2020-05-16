@@ -15,11 +15,13 @@ public class Parser {
   private final RuleTable ruleTable;
   private Set<Word> nullableWordsCache;
   private MapSetCache firstOfAWordCache;
+  private MapSetCache followOfAWordCache;
 
   private Parser(RuleTable rt) {
     this.ruleTable = rt;
     nullableWordsCache = new HashSet<>();
     firstOfAWordCache = new MapSetCache();
+    followOfAWordCache = new MapSetCache();
     calculatePrimarySets();
   }
 
@@ -54,10 +56,6 @@ public class Parser {
     return Collections.unmodifiableSet(nullableWordsCache);
   }
 
-  private void calculateNullableSet() {
-    ruleTable.getLHSWords().forEach(this::isWordNullable);
-  }
-
   public Set<Word> first(Word word) {
     if (word.getType() == WordType.TERMINAL) return Set.of(word);
     if (!firstOfAWordCache.containsKey(word)) {
@@ -65,7 +63,7 @@ public class Parser {
           ruleTable.getWordRules(word).stream()
               .map(Rule::getRHS)
               .filter(s -> !s.isNullSentence())
-              .map(this::takeWhileWordsAreNullableInclusive)
+              .map(this::trimToFirstNonNullableWord)
               .flatMap(s -> s.getWords().stream())
               .filter(w -> !w.equals(word))
               .flatMap(w -> first(w).stream())
@@ -76,20 +74,43 @@ public class Parser {
     return firstOfAWordCache.get(word);
   }
 
-  private Sentence takeWhileWordsAreNullableInclusive(Sentence s) {
+  private Sentence trimToFirstNonNullableWord(Sentence s) {
     return Sentence.getSentenceFromStreamOfWords(
         Stream.concat(
             s.getWords().stream().takeWhile(this::isWordNullable),
             s.getWords().stream().dropWhile(this::isWordNullable).findFirst().stream()));
   }
 
+  private Set<Word> follow(Word word) {
+    if (word.equals(Word.of("S"))) return Set.of(Word.of("$"));
+    return null;
+  }
+
+  private Set<Word> predict(Word word) {
+    return null;
+  }
+
+  private void calculatePrimarySets() {
+    calculateNullableSet();
+    calculateFirstSet();
+    calculateFollowSet();
+    calculatePredictSet();
+  }
+
+  private void calculateNullableSet() {
+    ruleTable.getLHSWords().forEach(this::isWordNullable);
+  }
+
   private void calculateFirstSet() {
     ruleTable.getLHSWords().forEach(this::first);
   }
 
-  public void calculatePrimarySets() {
-    calculateNullableSet();
-    calculateFirstSet();
+  private void calculatePredictSet() {
+    ruleTable.getLHSWords().forEach(this::follow);
+  }
+
+  private void calculateFollowSet() {
+    ruleTable.getLHSWords().forEach(this::predict);
   }
 }
 

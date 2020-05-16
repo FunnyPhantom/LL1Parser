@@ -41,7 +41,7 @@ public class InputParserTest {
     var ruleTable = ip.parseInput();
     Assertions.assertEquals(
         ruleTable.getLHSWords(),
-        Set.of("S", "A", "B").stream().map(Word::new).collect(Collectors.toSet()));
+        Set.of("S", "A", "B").stream().map(Word::of).collect(Collectors.toSet()));
     Assertions.assertEquals(
         ruleTable.getStartingRules(),
         Set.of("S: A B").stream().map(Rule::new).collect(Collectors.toSet()));

@@ -16,7 +16,7 @@ public class RuleTable {
   }
 
   public Set<Rule> getWordRules(String wordName) {
-    return getWordRules(new Word(wordName));
+    return getWordRules(Word.of(wordName));
   }
 
   public Set<Rule> getWordRules(Word word) {

@@ -10,7 +10,7 @@ public class Sentence {
   private Sentence(String[] wordStrings) {
     if (isNullableWordStrings(wordStrings))
       words = Collections.unmodifiableList(new ArrayList<>(0));
-    else words = Arrays.stream(wordStrings).map(Word::new).collect(Collectors.toUnmodifiableList());
+    else words = Arrays.stream(wordStrings).map(Word::of).collect(Collectors.toUnmodifiableList());
   }
 
   private static boolean isNullableWordStrings(String[] wordStrings) {
