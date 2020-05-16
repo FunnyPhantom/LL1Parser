@@ -35,4 +35,61 @@ public class ParserTest {
             .map(Word::new)
             .collect(Collectors.toUnmodifiableSet()));
   }
+
+  @Test
+  public void wordsFirstSetIsCorrect() {
+    var rs =
+        List.of(
+            "S: EXP",
+            "EXP: TERM EXP1",
+            "EXP1: + TERM EXP1",
+            "EXP1: - TERM EXP1",
+            "EXP1: #",
+            "TERM: FACTOR TERM1",
+            "TERM1: * FACTOR TERM1",
+            "TERM1: / FACTOR TERM1",
+            "TERM1: #",
+            "FACTOR: ID",
+            "ID: id ID1",
+            "ID1: ++",
+            "ID1: --",
+            "ID1: #",
+            "ID: -- id",
+            "ID: ++ id",
+            "FACTOR: num",
+            "FACTOR: ( EXP )");
+    var parser = Parser.createParser(new RuleTable(rs));
+    Assertions.assertEquals(
+        parser.first(new Word("ID1")),
+        Set.of("++", "--").stream().map(Word::new).collect(Collectors.toUnmodifiableSet()));
+    Assertions.assertEquals(
+        parser.first(new Word("ID")),
+        Set.of("++", "--", "id").stream().map(Word::new).collect(Collectors.toUnmodifiableSet()));
+    Assertions.assertEquals(
+        parser.first(new Word("FACTOR")),
+        Set.of("++", "--", "id", "num", "(").stream()
+            .map(Word::new)
+            .collect(Collectors.toUnmodifiableSet()));
+    Assertions.assertEquals(
+        parser.first(new Word("TERM1")),
+        Set.of("*", "/").stream().map(Word::new).collect(Collectors.toUnmodifiableSet()));
+    Assertions.assertEquals(
+        parser.first(new Word("TERM")),
+        Set.of("++", "--", "id", "num", "(").stream()
+            .map(Word::new)
+            .collect(Collectors.toUnmodifiableSet()));
+    Assertions.assertEquals(
+        parser.first(new Word("EXP1")),
+        Set.of("+", "-").stream().map(Word::new).collect(Collectors.toUnmodifiableSet()));
+    Assertions.assertEquals(
+        parser.first(new Word("EXP")),
+        Set.of("++", "--", "id", "num", "(").stream()
+            .map(Word::new)
+            .collect(Collectors.toUnmodifiableSet()));
+    Assertions.assertEquals(
+        parser.first(new Word("S")),
+        Set.of("++", "--", "id", "num", "(").stream()
+            .map(Word::new)
+            .collect(Collectors.toUnmodifiableSet()));
+  }
 }

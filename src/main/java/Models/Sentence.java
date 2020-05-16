@@ -2,6 +2,7 @@ package Models;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Sentence {
   private List<Word> words;
@@ -23,6 +24,11 @@ public class Sentence {
     if (sentenceString.isBlank()) throw new RuntimeException("Sentence String cannot be blank");
     return new Sentence(
         Arrays.stream(sentenceString.split(" ")).filter(s -> !s.isBlank()).toArray(String[]::new));
+  }
+
+  public static Sentence getSentenceFromStreamOfWords(Stream<Word> wordStream) {
+    return getSentenceFromString(
+        wordStream.map(Word::getName).reduce("", (s1, s2) -> s1 + " " + s2));
   }
 
   public List<Word> getWords() {

@@ -1,11 +1,11 @@
-import Models.Rule;
-import Models.RuleTable;
-import Models.Sentence;
-import Models.Word;
+import Models.*;
 
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * most of logic was implemented by the help of this Reference:
@@ -14,24 +14,17 @@ import java.util.stream.Collectors;
 public class Parser {
   private final RuleTable ruleTable;
   private Set<Word> nullableWordsCache;
+  private MapSetCache firstOfAWordCache;
 
   private Parser(RuleTable rt) {
     this.ruleTable = rt;
     nullableWordsCache = new HashSet<>();
+    firstOfAWordCache = new MapSetCache();
+    calculatePrimarySets();
   }
 
   public static Parser createParser(RuleTable rt) {
     return new Parser(rt);
-  }
-
-  private Set<Word> firstOrderNullableRule() {
-    return ruleTable.getLHSWords().stream()
-        .filter(
-            w ->
-                ruleTable.getWordRules(w).stream()
-                    .map(Rule::getRHS)
-                    .anyMatch(Sentence::isNullSentence))
-        .collect(Collectors.toSet());
   }
 
   private boolean isRuleNullable(Rule r) {
@@ -58,8 +51,52 @@ public class Parser {
   }
 
   public Set<Word> nullableWords() {
-    return ruleTable.getLHSWords().stream()
-        .filter(this::isWordNullable)
-        .collect(Collectors.toUnmodifiableSet());
+    return Collections.unmodifiableSet(nullableWordsCache);
+  }
+
+  private void calculateNullableSet() {
+    ruleTable.getLHSWords().forEach(this::isWordNullable);
+  }
+
+  public Set<Word> first(Word word) {
+    if (word.getType() == WordType.TERMINAL) return Set.of(word);
+    if (!firstOfAWordCache.containsKey(word)) {
+      var firstSet =
+          ruleTable.getWordRules(word).stream()
+              .map(Rule::getRHS)
+              .filter(s -> !s.isNullSentence())
+              .map(this::takeWhileWordsAreNullableInclusive)
+              .flatMap(s -> s.getWords().stream())
+              .filter(w -> !w.equals(word))
+              .flatMap(w -> first(w).stream())
+              .collect(Collectors.toUnmodifiableSet());
+      firstOfAWordCache.put(word, firstSet);
+    }
+
+    return firstOfAWordCache.get(word);
+  }
+
+  private Sentence takeWhileWordsAreNullableInclusive(Sentence s) {
+    return Sentence.getSentenceFromStreamOfWords(
+        Stream.concat(
+            s.getWords().stream().takeWhile(this::isWordNullable),
+            s.getWords().stream().dropWhile(this::isWordNullable).findFirst().stream()));
+  }
+
+  private void calculateFirstSet() {
+    ruleTable.getLHSWords().forEach(this::first);
+  }
+
+  public void calculatePrimarySets() {
+    calculateNullableSet();
+    calculateFirstSet();
+  }
+}
+
+class MapSetCache extends HashMap<Word, Set<Word>> {
+  public Set<Word> put(Word key, Word value) {
+    computeIfAbsent(key, w -> new HashSet<>());
+    super.get(key).add(value);
+    return super.get(key);
   }
 }
