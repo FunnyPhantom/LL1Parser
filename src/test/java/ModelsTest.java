@@ -33,9 +33,8 @@ public class ModelsTest {
   @Test
   public void toStringWorksIsAsIntended() {
     Assertions.assertEquals(Word.of("A").toString(), "A");
-    System.out.println(Word.of("A"));
+
     Assertions.assertEquals(Word.of("EXP0").toString(), "EXP0");
-    System.out.println(Word.of("EXP0"));
   }
 
   @Test
@@ -207,12 +206,12 @@ public class ModelsTest {
             .collect(Collectors.toUnmodifiableSet()));
   }
 
-  @Test
-  public void printSomeStuff() {
-    System.out.println(table.getStartingRules());
-    System.out.println(table.getWordRules("ST"));
-    System.out.println(table.getWordRules("STP"));
-    System.out.println(table.getLHSWords());
-    System.out.println(table.getRules());
-  }
+  //  @Test
+  //  public void printSomeStuff() {
+  //    System.out.println(table.getStartingRules());
+  //    System.out.println(table.getWordRules("ST"));
+  //    System.out.println(table.getWordRules("STP"));
+  //    System.out.println(table.getLHSWords());
+  //    System.out.println(table.getRules());
+  //  }
 }
