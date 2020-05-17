@@ -1,8 +1,13 @@
+package core;
+
 import Models.*;
 import utils.MapSetCache;
+import utils.ParseTable;
 
-import java.util.*;
-import java.util.function.Consumer;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -16,7 +21,7 @@ public class Parser {
   private MapSetCache firstOfAWordCache;
   private MapSetCache followOfAWordCache;
   private MapSetCache predictOfAWordCache;
-  private Map<Map.Entry<Word, Word>, Integer> parseTable;
+  private ParseTable parseTable;
 
   private Parser(RuleTable rt) {
     this.ruleTable = rt;
@@ -24,7 +29,7 @@ public class Parser {
     firstOfAWordCache = new MapSetCache();
     followOfAWordCache = new MapSetCache();
     predictOfAWordCache = new MapSetCache();
-    parseTable = new HashMap<>();
+    parseTable = new ParseTable();
     calculatePrimarySets();
     calculateParseTable();
   }
@@ -177,53 +182,16 @@ public class Parser {
     ruleTable
         .getRules()
         .forEach(
-            rule -> {
-              predict(rule)
-                  .forEach(
-                      token ->
-                          parseTable.put(
-                              Map.entry(rule.getLHS(), token), ruleTable.getRuleNumber(rule)));
-            });
+            rule ->
+                predict(rule)
+                    .forEach(
+                        token ->
+                            parseTable.put(
+                                Map.entry(rule.getLHS(), token), ruleTable.getRuleNumber(rule))));
   }
 
-  public Map<Map.Entry<Word, Word>, Integer> getParseTable() {
+  public ParseTable getParseTable() {
     return parseTable;
-  }
-
-  public void printParseTable() {
-    var keySet = parseTable.keySet();
-    var nonTerminalWords =
-        keySet.stream().map(Map.Entry::getKey).distinct().collect(Collectors.toUnmodifiableList());
-    var terminalWords =
-        keySet.stream()
-            .map(Map.Entry::getValue)
-            .distinct()
-            .collect(Collectors.toUnmodifiableList());
-    var wordSize = 30;
-
-    printHeader(terminalWords);
-    nonTerminalWords.forEach(printRow(terminalWords));
-  }
-
-  private Consumer<Word> printRow(List<Word> terminalWords) {
-    return W -> {
-      System.out.print(String.format("%12s", W));
-      terminalWords.forEach(
-          w ->
-              System.out.print(
-                  String.format(
-                      "%12s",
-                      parseTable.containsKey(Map.entry(W, w))
-                          ? Set.of(parseTable.get(Map.entry(W, w)))
-                          : Set.of())));
-      System.out.println();
-    };
-  }
-
-  private void printHeader(List<Word> terminalWords) {
-    System.out.print(String.format("%12s", " "));
-    terminalWords.forEach(w -> System.out.print(String.format("%12s", w)));
-    System.out.println();
   }
 
   private void calculateNullableSet() {

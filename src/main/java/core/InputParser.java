@@ -1,3 +1,5 @@
+package core;
+
 import Models.RuleTable;
 
 import java.io.File;

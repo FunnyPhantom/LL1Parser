@@ -1,8 +1,10 @@
 import Models.RuleTable;
 import Models.Word;
+import core.Parser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import utils.PrintUtils;
 
 import java.util.List;
 import java.util.Map;
@@ -171,7 +173,6 @@ public class ParserTest {
 
   @Test
   public void printParseTable() {
-    parser.printParseTable();
-    ;
+    PrintUtils.getInstance().printParseTable(parser.getParseTable());
   }
 }

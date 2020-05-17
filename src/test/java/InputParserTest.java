@@ -1,5 +1,6 @@
 import Models.Rule;
 import Models.Word;
+import core.InputParser;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
