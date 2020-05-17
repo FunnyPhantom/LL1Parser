@@ -1,3 +1,5 @@
+package main;
+
 import core.InputParser;
 import core.Parser;
 import utils.PrintUtils;
