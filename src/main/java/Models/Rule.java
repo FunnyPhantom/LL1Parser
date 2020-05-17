@@ -36,7 +36,11 @@ public class Rule {
   }
 
   public boolean isRuleDirectlyContainLHSWordInRHS() {
-    return getRHS().getWords().stream().anyMatch(getLHS()::equals);
+    return isRuleContainWordInRHS(getLHS());
+  }
+
+  public boolean isRuleContainWordInRHS(Word w) {
+    return getRHS().contain(w);
   }
 
   @Override

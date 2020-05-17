@@ -93,7 +93,13 @@ public class ModelsTest {
     Assertions.assertEquals(
         Sentence.getSentenceFromString("if BE STB else STB"),
         Sentence.getSentenceFromString(
-            "if BE      STB else                                   STB"));
+            " if BE      STB else                                   STB"));
+  }
+
+  @Test
+  private void canCorrectlyStateRuleContainAWord() {
+    Assertions.assertTrue(Sentence.getSentenceFromString("A B C").contain(Word.of("B")));
+    Assertions.assertFalse(Sentence.getSentenceFromString("#").contain(Word.of("A")));
   }
 
   // Rule
@@ -139,6 +145,13 @@ public class ModelsTest {
     Assertions.assertEquals(Rule.of("A : mamad B"), Rule.of("A  :  mamad B"));
   }
 
+  @Test
+  public void canCorrectlyStateRuleRHSContainsWord() {
+    Assertions.assertTrue(Rule.of("S: A B mamad").isRuleContainWordInRHS(Word.of("B")));
+    Assertions.assertFalse(Rule.of("S: A B mamad").isRuleContainWordInRHS(Word.of("op")));
+    Assertions.assertFalse(Rule.of("S: #").isRuleContainWordInRHS(Word.of("X")));
+  }
+
   // RuleTable
   List<String> ruleStringsSample =
       List.of("S : ST STP", "STP: #", "STP: ST STP", "ST: mamad", "S: abbas");
@@ -182,6 +195,16 @@ public class ModelsTest {
     Assertions.assertEquals(
         table.getLHSWords(),
         ruleStringsSample.stream().map(Rule::of).map(Rule::getLHS).collect(Collectors.toSet()));
+  }
+
+  @Test
+  public void canCorrectlyFindRulesThatContainWordInRHS() {
+    Assertions.assertEquals(
+        table.findRulesContainingWordInRHS(Word.of("STP")),
+        ruleStringsSample.stream()
+            .map(Rule::of)
+            .filter(r -> r.isRuleContainWordInRHS(Word.of("STP")))
+            .collect(Collectors.toUnmodifiableSet()));
   }
 
   @Test

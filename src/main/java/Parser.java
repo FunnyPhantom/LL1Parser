@@ -81,9 +81,42 @@ public class Parser {
             s.getWords().stream().dropWhile(this::isWordNullable).findFirst().stream()));
   }
 
-  private Set<Word> follow(Word word) {
+  public Set<Word> follow(Word word) {
     if (word.equals(Word.of("S"))) return Set.of(Word.of("$"));
-    return null;
+    if (!followOfAWordCache.containsKey(word)) {
+      var rules = ruleTable.findRulesContainingWordInRHS(word);
+      var firstWords =
+          rules.stream()
+              .flatMap(r -> firstOfWordInFollowSet(r, word))
+              .flatMap(w -> first(w).stream());
+
+      var followWords =
+          rules.stream()
+              .flatMap(r -> followOfWordInFollowSet(r, word))
+              .filter(w -> !w.equals(word))
+              .flatMap(w -> follow(w).stream());
+
+      var followSet =
+          Stream.concat(firstWords, followWords).collect(Collectors.toUnmodifiableSet());
+      followOfAWordCache.put(word, followSet);
+    }
+
+    return followOfAWordCache.get(word);
+  }
+
+  private Stream<Word> firstOfWordInFollowSet(Rule rule, Word word) {
+    return rule.getRHS().getWords().stream().dropWhile(w -> !w.equals(word)).skip(1);
+  }
+
+  private Stream<Word> followOfWordInFollowSet(Rule rule, Word word) {
+    var maybeWord =
+        rule.getRHS().getWords().stream()
+            .dropWhile(w -> !w.equals(word))
+            .skip(1)
+            .dropWhile(this::isWordNullable)
+            .findAny();
+    if (maybeWord.isPresent()) return Stream.empty();
+    else return Stream.of(rule.getLHS());
   }
 
   private Set<Word> predict(Word word) {

@@ -25,6 +25,12 @@ public class RuleTable {
         .collect(Collectors.toUnmodifiableSet());
   }
 
+  public Set<Rule> findRulesContainingWordInRHS(Word w) {
+    return rules.stream()
+        .filter(r -> r.isRuleContainWordInRHS(w))
+        .collect(Collectors.toUnmodifiableSet());
+  }
+
   public Set<Rule> getStartingRules() {
     return getWordRules("S");
   }

@@ -61,4 +61,8 @@ public class Sentence {
     if (isNullSentence()) return "#";
     else return words.stream().map(Word::toString).collect(Collectors.joining(" "));
   }
+
+  public boolean contain(Word w) {
+    return words.contains(w);
+  }
 }
