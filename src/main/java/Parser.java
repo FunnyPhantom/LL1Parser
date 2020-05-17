@@ -1,9 +1,8 @@
 import Models.*;
 import utils.MapSetCache;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -16,13 +15,18 @@ public class Parser {
   private Set<Word> nullableWordsCache;
   private MapSetCache firstOfAWordCache;
   private MapSetCache followOfAWordCache;
+  private MapSetCache predictOfAWordCache;
+  private Map<Map.Entry<Word, Word>, Integer> parseTable;
 
   private Parser(RuleTable rt) {
     this.ruleTable = rt;
     nullableWordsCache = new HashSet<>();
     firstOfAWordCache = new MapSetCache();
     followOfAWordCache = new MapSetCache();
+    predictOfAWordCache = new MapSetCache();
+    parseTable = new HashMap<>();
     calculatePrimarySets();
+    calculateParseTable();
   }
 
   public static Parser createParser(RuleTable rt) {
@@ -119,8 +123,47 @@ public class Parser {
     else return Stream.of(rule.getLHS());
   }
 
-  private Set<Word> predict(Word word) {
-    return null;
+  public Set<Word> predict(Word word) {
+    if (!predictOfAWordCache.containsKey(word)) {
+      var rules = ruleTable.getWordRules(word);
+      var tokens =
+          rules.stream()
+              .map(Rule::getRHS)
+              .filter(s -> !s.isNullSentence())
+              .map(s -> s.getWordAt(0))
+              .filter(w -> w.getType() == WordType.TERMINAL);
+
+      var followTokens = isWordNullable(word) ? follow(word).stream() : Stream.<Word>empty();
+
+      var predictTokens =
+          rules.stream()
+              .map(Rule::getRHS)
+              .filter(s -> !s.isNullSentence())
+              .map(s -> s.getWordAt(0))
+              .filter(w -> w.getType() == WordType.NON_TERMINAL)
+              .flatMap(w -> predict(w).stream());
+
+      var predictSet =
+          Stream.concat(Stream.concat(tokens, followTokens), predictTokens)
+              .collect(Collectors.toUnmodifiableSet());
+      predictOfAWordCache.put(word, predictSet);
+    }
+    return predictOfAWordCache.get(word);
+  }
+
+  public Set<Word> predict(Rule r) {
+    if (r.getRHS().isNullSentence()) return follow(r.getLHS());
+    if (r.getRHS().getWordAt(0).getType() == WordType.TERMINAL)
+      return Set.of(r.getRHS().getWordAt(0));
+    if (r.getRHS().getWordAt(0).equals(r.getLHS())) {
+      System.err.println("LEFT RECURSION");
+      return Set.of();
+    }
+    return predict(r.getRHS().getWordAt(0));
+  }
+
+  public Set<Word> getLHSWords() {
+    return ruleTable.getLHSWords();
   }
 
   private void calculatePrimarySets() {
@@ -128,6 +171,59 @@ public class Parser {
     calculateFirstSet();
     calculateFollowSet();
     calculatePredictSet();
+  }
+
+  private void calculateParseTable() {
+    ruleTable
+        .getRules()
+        .forEach(
+            rule -> {
+              predict(rule)
+                  .forEach(
+                      token ->
+                          parseTable.put(
+                              Map.entry(rule.getLHS(), token), ruleTable.getRuleNumber(rule)));
+            });
+  }
+
+  public Map<Map.Entry<Word, Word>, Integer> getParseTable() {
+    return parseTable;
+  }
+
+  public void printParseTable() {
+    var keySet = parseTable.keySet();
+    var nonTerminalWords =
+        keySet.stream().map(Map.Entry::getKey).distinct().collect(Collectors.toUnmodifiableList());
+    var terminalWords =
+        keySet.stream()
+            .map(Map.Entry::getValue)
+            .distinct()
+            .collect(Collectors.toUnmodifiableList());
+    var wordSize = 30;
+
+    printHeader(terminalWords);
+    nonTerminalWords.forEach(printRow(terminalWords));
+  }
+
+  private Consumer<Word> printRow(List<Word> terminalWords) {
+    return W -> {
+      System.out.print(String.format("%12s", W));
+      terminalWords.forEach(
+          w ->
+              System.out.print(
+                  String.format(
+                      "%12s",
+                      parseTable.containsKey(Map.entry(W, w))
+                          ? Set.of(parseTable.get(Map.entry(W, w)))
+                          : Set.of())));
+      System.out.println();
+    };
+  }
+
+  private void printHeader(List<Word> terminalWords) {
+    System.out.print(String.format("%12s", " "));
+    terminalWords.forEach(w -> System.out.print(String.format("%12s", w)));
+    System.out.println();
   }
 
   private void calculateNullableSet() {

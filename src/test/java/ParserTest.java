@@ -5,11 +5,13 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ParserTest {
   private static List<String> rs;
+  private static Parser parser;
 
   @BeforeAll
   private static void initRs() {
@@ -33,39 +35,21 @@ public class ParserTest {
             "ID: ++ id",
             "FACTOR: num",
             "FACTOR: ( EXP )");
+    parser = Parser.createParser(new RuleTable(rs));
   }
 
   @Test
   public void nullableWordsSetIsCorrect() {
-    var parser =
-        Parser.createParser(
-            new RuleTable(
-                List.of(
-                    // = skip
-                    "A: A",
-                    "A: #",
-                    "B: #",
-                    "C: #",
-                    "D: E F",
-                    "E: #",
-                    "F: a",
-                    "G: H",
-                    "H: I",
-                    "I: J K",
-                    "J: B",
-                    "K: C",
-                    "L: #",
-                    "L : A")));
     Assertions.assertEquals(
         parser.nullableWords(),
-        Set.of("A", "B", "C", "E", "G", "H", "I", "J", "K", "L").stream()
+        Set.of("EXP1", "TERM1", "ID1").stream()
             .map(Word::of)
             .collect(Collectors.toUnmodifiableSet()));
   }
 
   @Test
   public void wordsFirstSetIsCorrect() {
-    var parser = Parser.createParser(new RuleTable(rs));
+
     Assertions.assertEquals(
         parser.first(Word.of("ID1")),
         Set.of("++", "--").stream().map(Word::of).collect(Collectors.toUnmodifiableSet()));
@@ -102,7 +86,7 @@ public class ParserTest {
 
   @Test
   public void followOfSIsCorrect() {
-    var parser = Parser.createParser(new RuleTable(rs));
+
     Assertions.assertEquals(parser.follow(Word.of("S")), Set.of(Word.of("$")));
     Assertions.assertEquals(parser.follow(Word.of("EXP")), Set.of(Word.of("$"), Word.of(")")));
     Assertions.assertEquals(parser.follow(Word.of("EXP1")), Set.of(Word.of("$"), Word.of(")")));
@@ -121,5 +105,73 @@ public class ParserTest {
     Assertions.assertEquals(
         parser.follow(Word.of("ID1")),
         Set.of(Word.of("$"), Word.of(")"), Word.of("+"), Word.of("-"), Word.of("*"), Word.of("/")));
+  }
+
+  @Test
+  public void predictSetIsCorrect() {
+
+    Assertions.assertEquals(
+        parser.predict(Word.of("S")),
+        Set.of(Word.of("("), Word.of("num"), Word.of("++"), Word.of("--"), Word.of("id")));
+    Assertions.assertEquals(
+        parser.predict(Word.of("EXP")),
+        Set.of(Word.of("("), Word.of("num"), Word.of("++"), Word.of("--"), Word.of("id")));
+    Assertions.assertEquals(
+        parser.predict(Word.of("EXP1")),
+        Set.of(Word.of("$"), Word.of(")"), Word.of("+"), Word.of("-")));
+    Assertions.assertEquals(
+        parser.predict(Word.of("TERM")),
+        Set.of(Word.of("("), Word.of("num"), Word.of("++"), Word.of("--"), Word.of("id")));
+    Assertions.assertEquals(
+        parser.predict(Word.of("TERM1")),
+        Set.of(Word.of("$"), Word.of(")"), Word.of("+"), Word.of("-"), Word.of("/"), Word.of("*")));
+    Assertions.assertEquals(
+        parser.predict(Word.of("FACTOR")),
+        Set.of(Word.of("("), Word.of("num"), Word.of("++"), Word.of("--"), Word.of("id")));
+    Assertions.assertEquals(
+        parser.predict(Word.of("ID")), Set.of(Word.of("++"), Word.of("--"), Word.of("id")));
+    Assertions.assertEquals(
+        parser.predict(Word.of("ID1")),
+        Set.of(
+            Word.of("$"),
+            Word.of(")"),
+            Word.of("+"),
+            Word.of("-"),
+            Word.of("*"),
+            Word.of("/"),
+            Word.of("++"),
+            Word.of("--")));
+  }
+
+  @Test
+  public void predictRuleNumberIsCorrect() {
+    var pt = parser.getParseTable();
+
+    Assertions.assertEquals(
+        pt.getOrDefault(Map.entry(Word.of("EXP1"), Word.of("+")), -1), Integer.valueOf(2));
+    Assertions.assertEquals(
+        pt.getOrDefault(Map.entry(Word.of("EXP1"), Word.of("-")), -1), Integer.valueOf(3));
+    Assertions.assertEquals(
+        pt.getOrDefault(Map.entry(Word.of("EXP1"), Word.of(")")), -1), Integer.valueOf(4));
+    Assertions.assertEquals(
+        pt.getOrDefault(Map.entry(Word.of("EXP1"), Word.of("$")), -1), Integer.valueOf(4));
+
+    Assertions.assertEquals(
+        pt.getOrDefault(Map.entry(Word.of("S"), Word.of("--")), -1), Integer.valueOf(0));
+    Assertions.assertEquals(
+        pt.getOrDefault(Map.entry(Word.of("S"), Word.of("num")), -1), Integer.valueOf(0));
+
+    Assertions.assertEquals(
+        pt.getOrDefault(Map.entry(Word.of("EXP"), Word.of("id")), -1), Integer.valueOf(1));
+    Assertions.assertEquals(
+        pt.getOrDefault(Map.entry(Word.of("EXP"), Word.of("++")), -1), Integer.valueOf(1));
+    Assertions.assertEquals(
+        pt.getOrDefault(Map.entry(Word.of("EXP"), Word.of("(")), -1), Integer.valueOf(1));
+  }
+
+  @Test
+  public void printParseTable() {
+    parser.printParseTable();
+    ;
   }
 }

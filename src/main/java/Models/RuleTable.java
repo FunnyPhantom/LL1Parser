@@ -6,9 +6,11 @@ import java.util.stream.Collectors;
 
 public class RuleTable {
   private Set<Rule> rules;
+  private List<Rule> ruleOrders;
 
   public RuleTable(List<String> parsedRuleStrings) {
     rules = parsedRuleStrings.stream().map(Rule::of).collect(Collectors.toUnmodifiableSet());
+    ruleOrders = parsedRuleStrings.stream().map(Rule::of).collect(Collectors.toUnmodifiableList());
   }
 
   public Set<Word> getLHSWords() {
@@ -29,6 +31,10 @@ public class RuleTable {
     return rules.stream()
         .filter(r -> r.isRuleContainWordInRHS(w))
         .collect(Collectors.toUnmodifiableSet());
+  }
+
+  public int getRuleNumber(Rule r) {
+    return ruleOrders.indexOf(r);
   }
 
   public Set<Rule> getStartingRules() {
