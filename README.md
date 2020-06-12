@@ -12,7 +12,9 @@
 It will create a file named ```LL1Parser.jar``` in `{project location}/target`
 
 ### Run
-just run `java -jar LL1Parser.jar [-f <Path to file>]`
+just run `java -jar LL1Parser.jar [-f <Path to file>][-stf]`
+
+(-stf flag saves output to file.)
 
 if no path is provided you can input the path inside the program.
 

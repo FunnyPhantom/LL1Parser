@@ -3,6 +3,7 @@ package utils;
 import Models.Word;
 import core.Parser;
 
+import java.io.PrintStream;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,6 +34,16 @@ public class PrintUtils {
     nonTerminalWords.forEach(printRow(terminalWords, parseTable));
     System.out.println();
     System.out.println("====");
+  }
+
+  public void saveParseTable(ParseTable parseTable) {
+    try {
+      var originalOut = System.out;
+      System.setOut(new PrintStream("./table.pt"));
+      printParseTable(parseTable);
+      System.setOut(originalOut);
+    } catch (Exception ignored) {
+    }
   }
 
   private Consumer<Word> printRow(List<Word> terminalWords, ParseTable parseTable) {

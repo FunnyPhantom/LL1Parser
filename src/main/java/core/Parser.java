@@ -89,8 +89,8 @@ public class Parser {
             s.getWords().stream().takeWhile(this::isWordNullable),
             s.getWords().stream().dropWhile(this::isWordNullable).findFirst().stream()));
   }
-
-  public Set<Word> follow(Word word) {
+  // S -> ABC
+  public Set<Word> follow(Word word, Set<Word> visitedWords) {
     if (word.equals(Word.of("S"))) return Set.of(Word.of("$"));
     if (!followOfAWordCache.containsKey(word)) {
       var rules = ruleTable.findRulesContainingWordInRHS(word);
@@ -98,12 +98,18 @@ public class Parser {
           rules.stream()
               .flatMap(r -> firstOfWordInFollowSet(r, word))
               .flatMap(w -> first(w).stream());
-
+      System.out.println(String.format("first %s", firstWords));
       var followWords =
           rules.stream()
               .flatMap(r -> followOfWordInFollowSet(r, word))
-              .filter(w -> !w.equals(word))
-              .flatMap(w -> follow(w).stream());
+              .filter(w -> !visitedWords.contains(w))
+              .flatMap(
+                  w ->
+                      follow(
+                          w,
+                          Stream.concat(visitedWords.stream(), Stream.of(w))
+                              .collect(Collectors.toUnmodifiableSet()))
+                          .stream());
 
       var followSet =
           Stream.concat(firstWords, followWords).collect(Collectors.toUnmodifiableSet());
@@ -111,6 +117,10 @@ public class Parser {
     }
 
     return followOfAWordCache.get(word);
+  }
+
+  public Set<Word> follow(Word word) {
+    return follow(word, Set.of(word));
   }
 
   private Stream<Word> firstOfWordInFollowSet(Rule rule, Word word) {

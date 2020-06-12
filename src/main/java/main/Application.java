@@ -49,6 +49,10 @@ public class Application {
     printUtils.printPredictSet(parser);
     printUtils.printParseTable(parser.getParseTable());
 
+    if (List.of(args).indexOf("-stf") != -1) {
+      printUtils.saveParseTable(parser.getParseTable());
+    }
+
     System.out.println("exiting program...");
   }
 }
